@@ -1,4 +1,4 @@
-
+```yaml
 name: Build Minecraft Mod
 
 on:
@@ -22,19 +22,26 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          cache: gradle
+
+      - name: Validate Java
+        run: java -version
 
       - name: Build JAR
         run: |
-          chmod +x gradlew 2>/dev/null || true
-          if [ -f ./gradlew ]; then
-            ./gradlew build
-          else
-            gradle build
+          if [ ! -f ./gradlew ]; then
+            echo "ERROR: gradlew not found in repository root"
+            exit 1
           fi
 
+          chmod +x ./gradlew
+          ./gradlew build --stacktrace
+
       - name: Upload JAR
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Minecraft-Mod-JAR
           path: build/libs/*.jar
           if-no-files-found: error
+```
